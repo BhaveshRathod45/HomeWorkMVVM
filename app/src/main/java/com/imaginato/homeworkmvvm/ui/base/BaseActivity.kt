@@ -30,14 +30,18 @@ open class BaseActivity : AppCompatActivity() {
 
     private fun initObserve() {
         mViewModel?.progress?.observe(this) {
-            if (it) {
-                mProgress?.show()
-            } else {
-                mProgress?.dismiss()
+            if (mProgress != null) {
+                if (it) {
+                    mProgress?.show()
+                } else {
+                    mProgress?.dismiss()
+                }
             }
+
         }
         mViewModel?.errorMessage?.observe(this) {
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            if (it.isNotEmpty())
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
         }
     }
 

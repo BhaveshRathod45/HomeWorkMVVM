@@ -48,7 +48,7 @@ val repositoryModules = module {
 
 val viewModelModules = module {
     viewModel {
-        LoginViewModel()
+        LoginViewModel(get())
     }
 }
 

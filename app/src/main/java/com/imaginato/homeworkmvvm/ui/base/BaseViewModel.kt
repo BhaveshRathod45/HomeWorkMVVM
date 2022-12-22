@@ -11,7 +11,7 @@ import org.koin.core.component.KoinComponent
 @KoinApiExtension
 abstract class BaseViewModel : ViewModel(), KoinComponent {
     protected var _progress: MutableLiveData<Boolean> = MutableLiveData()
-    protected var _errorMessage: MutableLiveData<String> = MutableLiveData()
+    protected var _errorMessage: MutableLiveData<String> = MutableLiveData("")
 
     val errorMessage: LiveData<String>
         get() {

@@ -1,18 +1,31 @@
 package com.imaginato.homeworkmvvm
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import com.imaginato.homeworkmvvm.data.local.login.User
 import com.imaginato.homeworkmvvm.data.local.login.UserDao
+import com.imaginato.homeworkmvvm.data.remote.Result
 import com.imaginato.homeworkmvvm.data.remote.login.LoginApi
 import com.imaginato.homeworkmvvm.data.remote.login.LoginDataRepository
 import com.imaginato.homeworkmvvm.data.remote.login.response.LoginResponse
 import com.imaginato.homeworkmvvm.ui.login.LoginViewModel
-import org.junit.Test
-
-import org.junit.Assert.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.koin.core.component.KoinApiExtension
+import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import retrofit2.Callback
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -25,50 +38,92 @@ class LoginViewModelUnitTest {
     private var loginApi: LoginApi = mock {}
     private var userDao: UserDao = mock {}
     private lateinit var repository: LoginDataRepository
-    //private var loginResponse: retrofit2.Call<LoginResponse?> = mock {}
+    private var loginResponse: retrofit2.Call<LoginResponse?> = mock {}
+
+    val dispatcher = StandardTestDispatcher()
+
+    @Rule
+    @JvmField
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Before
     fun setInit() {
-        repository = LoginDataRepository(loginApi,userDao)
-        viewModel = LoginViewModel()
+        Dispatchers.setMain(dispatcher)
+        repository = LoginDataRepository(loginApi, userDao)
+        viewModel = LoginViewModel(repository)
+
     }
 
+
     @Test
-    fun username_isEmpty() {
-        viewModel.doLogin("","")
+    fun usernameIsEmpty() {
+        viewModel.doLogin("", "")
         assert(viewModel.errorMessage.value == "Username cannot be empty")
     }
 
     @Test
-    fun usernameisNotEmpty() {
-        viewModel.doLogin("123","")
+    fun userNameIsNotEmpty() {
+        viewModel.doLogin("123", "")
         assert(viewModel.errorMessage.awaitValue() != "Username cannot be empty")
     }
 
     @Test
-    fun `password is empty`() {
-        viewModel.doLogin("1234","")
+    fun passwordIsEmpty() {
+        viewModel.doLogin("1234", "")
         assert(viewModel.errorMessage.awaitValue() == "Password cannot be empty")
     }
 
     @Test
-    fun `password is not empty`() {
-        viewModel.doLogin("1234","123")
+    fun passwordIsNotEmpty() {
+        viewModel.doLogin("1234", "123")
         assert(viewModel.errorMessage.awaitValue() != "Password cannot be empty")
     }
 
     @Test
     fun isPasswordLengthLessThen6() {
-        viewModel.doLogin("1234","123")
+        viewModel.doLogin("1234", "123")
         assert(viewModel.errorMessage.awaitValue() == "Password must be great then 6 character")
     }
 
     @Test
     fun isPasswordLengthNotLessThen6() {
-        viewModel.doLogin("1234","123574")
+        viewModel.doLogin("1234", "123574")
         assert(viewModel.errorMessage.awaitValue() != "Password must be great then 6 character")
     }
 
+
+   /* @Test
+    fun `login with valid username should set loginResult as success`() = runTest {
+        val flow = MutableSharedFlow<Result<User>>(replay = 1)
+        whenever(repository.doLogin(any())).doReturn(flow)
+
+        launch {
+            flow.emit(Result.Success(User("", "")))
+        }.join()
+
+        launch {
+            viewModel.doLogin("tes", "eedjfdjfdjf")
+        }.join()
+
+        assert(viewModel.userLiveData.awaitValue() != null)
+    }
+
+    @Test
+    fun `doLogin viewModel method test with error`() {
+        Mockito.doAnswer {
+            val callback: Callback<LoginResponse?> = it?.getArgument(
+                0
+            )!!
+            callback.onFailure(loginResponse, Exception("Error"))
+
+        }.`when`(loginResponse).enqueue(any())
+
+        // whenever(loginApi.doLogin(any())).doReturn(loginResponse)
+        viewModel.doLogin("", "")
+
+        //assert(viewModel.mError.getOrAwaitValue() == "Error")
+    }
+*/
 
 }
 

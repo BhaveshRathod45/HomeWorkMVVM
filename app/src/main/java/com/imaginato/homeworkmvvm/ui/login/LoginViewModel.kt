@@ -16,10 +16,8 @@ import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.inject
 
 @KoinApiExtension
-class LoginViewModel : BaseViewModel() {
-    private val repository: LoginRepository by inject()
+class LoginViewModel(private val repository: LoginRepository) : BaseViewModel() {
     private var _userLiveData: MutableLiveData<User> = MutableLiveData()
-
     val userLiveData: LiveData<User>
         get() {
             return _userLiveData
