@@ -1,11 +1,11 @@
-package com.imaginato.homeworkmvvm.data.local.demo
+package com.imaginato.homeworkmvvm.data.local.login
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 
 @Dao
-interface DemoDao {
+interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertDemo(demo: List<Demo>)
+     fun insertUser(user: User)
 }
